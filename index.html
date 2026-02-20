@@ -65,17 +65,25 @@
             color: #004c4c;
             border-bottom-color: #004c4c;
         }
-        .success-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            text-align: center;
-            padding: 2rem;
+
+        /* Printing Styles */
+        @media print {
+            body * { visibility: hidden; }
+            #print-assignment, #print-assignment * { visibility: visible; }
+            #print-assignment {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                padding: 40px;
+            }
+            .no-print { display: none !important; }
+        }
+
+        #print-assignment {
+            background: white;
+            border: 2px solid #004c4c;
         }
     </style>
 </head>
@@ -83,16 +91,16 @@
 
     <div class="max-w-4xl w-full mt-8">
         <!-- Header -->
-        <div class="text-center mb-6">
+        <div class="text-center mb-6 no-print">
             <h1 class="text-4xl font-bold text-[#004c4c]">Jose & Fatima</h1>
             <nav class="flex justify-center gap-4 mt-4">
                 <button onclick="setView('story')" id="tab-story" class="tab-btn active">The Story</button>
-                <button onclick="setView('vocab')" id="tab-vocab" class="tab-btn">Vocabulary Lab</button>
+                <button onclick="setView('vocab')" id="tab-vocab" class="tab-btn">Practice & Print</button>
             </nav>
         </div>
 
         <!-- Story View -->
-        <div id="story-view" class="book-card relative">
+        <div id="story-view" class="book-card relative no-print">
             <div class="h-1 bg-gray-100 w-full">
                 <div id="progress-bar" class="h-full bg-orange-400 transition-all duration-300" style="width: 20%"></div>
             </div>
@@ -107,9 +115,7 @@
                 </div>
 
                 <div class="p-8 md:p-12 flex-grow flex flex-col justify-center">
-                    <p id="story-text" class="text-xl md:text-2xl leading-relaxed text-gray-800 serif italic text-center">
-                        <!-- Text injected here -->
-                    </p>
+                    <p id="story-text" class="text-xl md:text-2xl leading-relaxed text-gray-800 serif italic text-center"></p>
                 </div>
             </div>
 
@@ -129,63 +135,226 @@
             </div>
         </div>
 
-        <!-- Vocabulary View -->
-        <div id="vocab-view" class="book-card hidden p-8 overflow-y-auto max-h-[80vh] relative">
-            <!-- Success Modal -->
-            <div id="submission-success" class="success-overlay hidden">
-                <div class="bg-green-100 p-4 rounded-full mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-2">Assignment Submitted!</h3>
-                <p class="text-gray-600 mb-6 max-w-sm" id="submission-msg"></p>
-                <button onclick="closeSuccess()" class="bg-[#004c4c] text-white px-8 py-2 rounded-lg font-bold">Write Another</button>
-            </div>
-
+        <!-- Vocabulary & Print View -->
+        <div id="vocab-view" class="book-card hidden p-8 overflow-y-auto max-h-[85vh] relative no-print">
             <h2 class="text-2xl font-bold text-[#004c4c] mb-6">Master These Words</h2>
-            <div id="vocab-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-                <!-- Vocab cards injected here -->
-            </div>
+            <div id="vocab-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10"></div>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Practice Quiz -->
+                <!-- Quiz -->
                 <div class="bg-orange-50 p-6 rounded-xl border border-orange-200 h-fit">
-                    <h3 class="text-xl font-bold text-orange-800 mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                        Match the Meaning
-                    </h3>
+                    <h3 class="text-xl font-bold text-orange-800 mb-4 flex items-center gap-2">Match the Meaning</h3>
                     <div id="quiz-container" class="space-y-4">
-                        <p id="quiz-definition" class="text-lg text-center font-medium italic mb-4 min-h-[60px] flex items-center justify-center"></p>
+                        <p id="quiz-definition" class="text-lg text-center font-medium italic mb-4 min-h-[60px] flex items-center justify-center text-orange-900"></p>
                         <div id="quiz-options" class="grid grid-cols-2 gap-2"></div>
                     </div>
                 </div>
 
-                <!-- Writing Spot -->
+                <!-- Assignment Writing -->
                 <div class="bg-blue-50 p-6 rounded-xl border border-blue-200">
-                    <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
-                        Writing Practice
-                    </h3>
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Final Assignment</h3>
                     <div class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-blue-700 uppercase mb-1">Student Name</label>
-                                <input type="text" id="student-name" class="w-full p-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400 outline-none text-sm" placeholder="Your Name">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-blue-700 uppercase mb-1">Teacher Email</label>
-                                <input type="email" id="teacher-email" class="w-full p-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400 outline-none text-sm" placeholder="teacher@school.edu">
-                            </div>
+                        <div>
+                            <label class="block text-xs font-bold text-blue-700 uppercase mb-1">Student Full Name</label>
+                            <input type="text" id="student-name" class="w-full p-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Enter your name">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-blue-700 mb-1">Pick a word to use:</label>
-                            <select id="writing-word-select" class="w-full p-2 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                                <!-- Options injected -->
-                            </select>
+                            <label class="block text-sm font-semibold text-blue-700 mb-1">Select Vocabulary Word:</label>
+                            <select id="writing-word-select" class="w-full p-2 rounded-lg border border-blue-300 bg-white"></select>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-blue-700 mb-1">Write your sentence:</label>
-                            <textarea id="student-sentence" rows="3" class="w-full p-3 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" placeholder="Type your creative sentence here..."></textarea>
+                            <textarea id="student-sentence" rows="4" class="w-full p-3 rounded-lg border border-blue-300 focus:ring-2 focus:ring-blue-400 bg-white" placeholder="Write a sentence about the story..."></textarea>
                         </div>
-                        <button id="submit-btn" onclick="submitWriting()"
+                        <button onclick="generatePrintDoc()" class="w-full bg-[#004c4c] text-white font-bold py-3 rounded-lg hover:bg-emerald-800 transition shadow-md flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                            Generate Printable Assignment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Document for Printing (Hidden initially) -->
+        <div id="print-view-container" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
+            <div id="print-assignment" class="max-w-2xl w-full p-12 shadow-2xl overflow-y-auto max-h-screen">
+                <div class="border-b-4 border-[#004c4c] pb-4 mb-8 flex justify-between items-end">
+                    <div>
+                        <h1 class="text-3xl font-bold text-[#004c4c]">Assignment Submission</h1>
+                        <p class="text-gray-500">Story: Jose & Fatima (A Cultural Bridge)</p>
+                    </div>
+                    <div class="text-right">
+                        <p id="print-date" class="text-sm font-bold"></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 mb-10">
+                    <div>
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Student Name</h3>
+                        <p id="doc-name" class="text-xl font-bold text-gray-800 border-b border-dashed border-gray-300 pb-1"></p>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Vocabulary Word</h3>
+                        <p id="doc-word" class="text-xl font-bold text-emerald-700"></p>
+                    </div>
+                </div>
+
+                <div class="mb-10">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Original Sentence</h3>
+                    <div class="bg-gray-50 p-6 rounded-lg border italic text-lg leading-relaxed text-gray-700" id="doc-sentence"></div>
+                </div>
+
+                <div class="pt-8 border-t border-gray-100 flex justify-between items-center no-print">
+                    <button onclick="window.print()" class="bg-emerald-600 text-white px-8 py-3 rounded-lg font-bold">Confirm & Print</button>
+                    <button onclick="closePrint()" class="text-gray-400 hover:text-gray-600 font-medium">Cancel / Go Back</button>
+                </div>
+                
+                <div class="hidden print:block mt-20">
+                    <div class="flex justify-between">
+                        <div class="border-t border-black w-48 text-center pt-2 text-xs">Teacher Signature</div>
+                        <div class="border-t border-black w-48 text-center pt-2 text-xs">Date Reviewed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = ""; 
+        const storyPages = [
+            { text: "Jose is from Mexico, and Fatima is from Morocco. They met at a university in Spain where they were both studying. Although they come from different countries and follow different traditions, they found they had much in common.", prompt: "Oil painting. A Mexican man and a Moroccan woman in a blue headscarf meeting in a sunlit library in Spain." },
+            { text: "They began spending all their time together, studying in the library and sharing meals. Jose loved the smell of Fatima's Moroccan spices, and Fatima enjoyed learning about Jose's family in Mexico.", prompt: "Oil painting. A cozy cafe scene with Mexican tacos and Moroccan tagine on the table. Two students laughing." },
+            { text: "To both of them, family is the most important thing. When they decided to get married, they knew they needed a meeting between their families to bridge their cultures.", prompt: "Oil painting. A home decorated with Moroccan lanterns and Mexican patterns. Hopeful atmosphere." },
+            { text: "At first, the parents were nervous. But as they shared a meal, they soon realized their love for their children was exactly the same.", prompt: "Oil painting. Parents from different cultures shaking hands across a dinner table. Warm lighting." },
+            { text: "Today, Jose and Fatima live happily, blending their two worlds into one. Love is the bridge that connects every culture.", prompt: "Oil painting. The couple walking in a garden with olive trees and colorful flowers. Peaceful." }
+        ];
+
+        const vocabulary = [
+            { word: "Tradition", definition: "A custom or belief passed down through families." },
+            { word: "Common", definition: "Shared by two or more people; alike." },
+            { word: "Spices", definition: "Seeds or plants used to give food more flavor." },
+            { word: "Important", definition: "Having great value or influence." },
+            { word: "Bridge", definition: "Something that connects two different things." },
+            { word: "Nervous", definition: "Feeling worried or afraid about something." },
+            { word: "Silk", definition: "A fine, strong, soft, and shiny fabric." },
+            { word: "Realize", definition: "To suddenly understand or become aware." },
+            { word: "Blending", definition: "Mixing different things together smoothly." },
+            { word: "Culture", definition: "The way of life and beliefs of a group of people." }
+        ];
+
+        let currentPage = 0;
+        let quizTarget = null;
+
+        function setView(view) {
+            document.getElementById('story-view').classList.toggle('hidden', view !== 'story');
+            document.getElementById('vocab-view').classList.toggle('hidden', view !== 'vocab');
+            document.getElementById('tab-story').classList.toggle('active', view === 'story');
+            document.getElementById('tab-vocab').classList.toggle('active', view === 'vocab');
+            if (view === 'vocab') initVocab();
+        }
+
+        async function generateImage(prompt) {
+            const loader = document.getElementById('loader');
+            const imgEl = document.getElementById('story-image');
+            imgEl.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ instances: [{ prompt }], parameters: { sampleCount: 1 } })
+                });
+                const result = await response.json();
+                if (result.predictions?.[0]) {
+                    imgEl.src = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    imgEl.classList.remove('hidden');
+                }
+            } catch (e) { console.error(e); }
+            loader.classList.add('hidden');
+        }
+
+        function updatePage() {
+            document.getElementById('story-text').innerText = storyPages[currentPage].text;
+            document.getElementById('page-number').innerText = `Page ${currentPage + 1} of ${storyPages.length}`;
+            document.getElementById('progress-bar').style.width = `${((currentPage + 1) / storyPages.length) * 100}%`;
+            document.getElementById('prev-btn').disabled = currentPage === 0;
+            document.getElementById('next-btn').disabled = currentPage === storyPages.length - 1;
+            generateImage(storyPages[currentPage].prompt);
+        }
+
+        function changePage(delta) { currentPage += delta; updatePage(); }
+
+        async function readAloud() {
+            const text = storyPages[currentPage].text;
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 0.9;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function initVocab() {
+            const container = document.getElementById('vocab-list');
+            const select = document.getElementById('writing-word-select');
+            if (container.children.length > 0) return;
+
+            vocabulary.forEach(v => {
+                const card = document.createElement('div');
+                card.className = "bg-white border p-4 rounded-xl shadow-sm";
+                card.innerHTML = `<h4 class="font-bold text-[#004c4c]">${v.word}</h4><p class="text-sm text-gray-600">${v.definition}</p>`;
+                container.appendChild(card);
+                const opt = document.createElement('option');
+                opt.value = v.word; opt.innerText = v.word;
+                select.appendChild(opt);
+            });
+            nextQuiz();
+        }
+
+        function nextQuiz() {
+            quizTarget = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+            document.getElementById('quiz-definition').innerText = `"${quizTarget.definition}"`;
+            const options = [...vocabulary].sort(() => 0.5 - Math.random()).slice(0, 4);
+            if (!options.includes(quizTarget)) options[0] = quizTarget;
+            const optContainer = document.getElementById('quiz-options');
+            optContainer.innerHTML = '';
+            options.sort(() => 0.5 - Math.random()).forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-white border p-3 rounded-lg font-semibold hover:bg-orange-100 transition";
+                btn.innerText = opt.word;
+                btn.onclick = () => {
+                    if (opt.word === quizTarget.word) {
+                        btn.className = "bg-green-500 text-white p-3 rounded-lg font-semibold";
+                        setTimeout(nextQuiz, 800);
+                    } else {
+                        btn.className = "bg-red-500 text-white p-3 rounded-lg font-semibold";
+                        setTimeout(() => btn.className = "bg-white border p-3 rounded-lg font-semibold", 500);
+                    }
+                };
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function generatePrintDoc() {
+            const name = document.getElementById('student-name').value;
+            const word = document.getElementById('writing-word-select').value;
+            const sentence = document.getElementById('student-sentence').value;
+
+            if (!name || !sentence.trim()) {
+                alert("Please enter your name and write a sentence first!");
+                return;
+            }
+
+            document.getElementById('doc-name').innerText = name;
+            document.getElementById('doc-word').innerText = word;
+            document.getElementById('doc-sentence').innerText = `"${sentence}"`;
+            document.getElementById('print-date').innerText = new Date().toLocaleDateString();
+            document.getElementById('print-view-container').classList.remove('hidden');
+        }
+
+        function closePrint() {
+            document.getElementById('print-view-container').classList.add('hidden');
+        }
+
+        window.onload = updatePage;
+    </script>
+</body>
+</html>
