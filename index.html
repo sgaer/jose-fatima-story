@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -65,21 +65,17 @@
             color: #004c4c;
             border-bottom-color: #004c4c;
         }
-        .success-toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #059669;
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            transform: translateY(100px);
-            transition: transform 0.3s ease;
-            z-index: 50;
-        }
-        .success-toast.show {
-            transform: translateY(0);
+        .success-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+            padding: 2rem;
         }
     </style>
 </head>
@@ -134,7 +130,19 @@
         </div>
 
         <!-- Vocabulary View -->
-        <div id="vocab-view" class="book-card hidden p-8 overflow-y-auto max-h-[80vh]">
+        <div id="vocab-view" class="book-card hidden p-8 overflow-y-auto max-h-[80vh] relative">
+            <!-- Success Modal -->
+            <div id="submission-success" class="success-overlay hidden">
+                <div class="bg-green-100 p-4 rounded-full mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Assignment Submitted!</h3>
+                <p class="text-gray-600 mb-6 max-w-sm" id="submission-msg"></p>
+                <button onclick="closeSuccess()" class="bg-[#004c4c] text-white px-8 py-2 rounded-lg font-bold">Write Another</button>
+            </div>
+
             <h2 class="text-2xl font-bold text-[#004c4c] mb-6">Master These Words</h2>
             <div id="vocab-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                 <!-- Vocab cards injected here -->
@@ -180,260 +188,4 @@
                             <label class="block text-sm font-semibold text-blue-700 mb-1">Write your sentence:</label>
                             <textarea id="student-sentence" rows="3" class="w-full p-3 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" placeholder="Type your creative sentence here..."></textarea>
                         </div>
-                        <button onclick="submitWriting()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-sm">
-                            Submit to Teacher
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Success Toast Notification -->
-    <div id="success-toast" class="success-toast">
-        Sent to teacher! Keep up the great work.
-    </div>
-
-    <script>
-        const apiKey = ""; 
-        
-        const JOSE_DESC = "a young Mexican man with short tidy dark hair, tan skin, and a friendly face wearing a simple green cotton shirt";
-        const FATIMA_DESC = "a young Moroccan woman with kind eyes wearing a beautiful light blue silk headscarf (hijab) and a modest cream-colored dress";
-        const STYLE_DESC = "Soft oil painting style, consistent character design, warm natural lighting, detailed but cozy atmosphere.";
-
-        const storyPages = [
-            {
-                text: "Jose is from Mexico, and Fatima is from Morocco. They met at a university in Spain where they were both studying. Although they come from different countries and follow different traditions, they found they had much in common.",
-                prompt: `Oil painting. ${JOSE_DESC} and ${FATIMA_DESC} meeting for the first time in a sunlit university library in Spain. They are looking at books together. ${STYLE_DESC}`
-            },
-            {
-                text: "They began spending all their time together, studying in the library and sharing meals from their home countries. Jose loved the smell of Fatima's Moroccan spices, and Fatima enjoyed learning about Jose's family in Mexico.",
-                prompt: `Oil painting. ${JOSE_DESC} and ${FATIMA_DESC} sitting at a cozy outdoor cafe table. They are sharing a plate of Mexican tacos and a Moroccan tagine bowl. Mediterranean sunlight. ${STYLE_DESC}`
-            },
-            {
-                text: "To both of them, family is the most important thing in life. When they decided to get married, they knew they needed a meeting between their families to bridge their cultures.",
-                prompt: `Oil painting. ${JOSE_DESC} and ${FATIMA_DESC} standing together proudly in a decorated dining room. The room has Mexican flags and Moroccan lanterns. ${STYLE_DESC}`
-            },
-            {
-                text: "At first, the parents were nervous. Fatima's mother wore a beautiful silk headscarf, and Jose's father wore his best traditional suit. But they soon realized their love for their children was the same.",
-                prompt: `Oil painting. A Mexican father in a suit and a Moroccan mother in a purple headscarf shaking hands. In the background, ${JOSE_DESC} and ${FATIMA_DESC} are smiling. Warm dinner setting. ${STYLE_DESC}`
-            },
-            {
-                text: "Today, Jose and Fatima live happily, blending their two worlds into one. Love is the bridge that connects every culture.",
-                prompt: `Oil painting. ${JOSE_DESC} and ${FATIMA_DESC} walking hand-in-hand through a lush garden with pink bougainvillea and olive trees. They look happy and content. Bright, hopeful lighting. ${STYLE_DESC}`
-            }
-        ];
-
-        const vocabulary = [
-            { word: "Tradition", definition: "A custom or belief passed down through families.", example: "Mexican holidays are full of beautiful traditions." },
-            { word: "Common", definition: "Shared by two or more people; alike.", example: "Jose and Fatima have many hobbies in common." },
-            { word: "Spices", definition: "Seeds or plants used to give food more flavor.", example: "Moroccan food uses many aromatic spices." },
-            { word: "Important", definition: "Having great value or influence.", example: "Family is very important in both cultures." },
-            { word: "Bridge", definition: "Something that connects two different things.", example: "The meeting helped bridge the gap between families." },
-            { word: "Nervous", definition: "Feeling worried or afraid about something.", example: "The parents felt nervous before the big dinner." },
-            { word: "Silk", definition: "A fine, strong, soft, and shiny fabric.", example: "Her headscarf was made of smooth blue silk." },
-            { word: "Realize", definition: "To suddenly understand or become aware of something.", example: "They realized they shared the same values." },
-            { word: "Blending", definition: "Mixing different things together smoothly.", example: "The couple is blending their traditions into one home." },
-            { word: "Culture", definition: "The way of life, art, and beliefs of a group of people.", example: "Spain has a very rich and vibrant culture." }
-        ];
-
-        let currentPage = 0;
-        let currentAudio = null;
-        let quizTarget = null;
-        const imageCache = {};
-
-        function setView(view) {
-            document.getElementById('story-view').classList.toggle('hidden', view !== 'story');
-            document.getElementById('vocab-view').classList.toggle('hidden', view !== 'vocab');
-            document.getElementById('tab-story').classList.toggle('active', view === 'story');
-            document.getElementById('tab-vocab').classList.toggle('active', view === 'vocab');
-            if (view === 'vocab') initVocab();
-        }
-
-        async function generateImage(prompt, pageIndex) {
-            if (imageCache[pageIndex]) { displayImage(imageCache[pageIndex]); return; }
-            const loader = document.getElementById('loader');
-            const imgEl = document.getElementById('story-image');
-            imgEl.classList.add('hidden');
-            loader.classList.remove('hidden');
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ instances: [{ prompt }], parameters: { sampleCount: 1 } })
-                });
-                const result = await response.json();
-                if (result.predictions?.[0]) {
-                    const dataUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
-                    imageCache[pageIndex] = dataUrl;
-                    displayImage(dataUrl);
-                }
-            } catch (error) { console.error(error); loader.classList.add('hidden'); }
-        }
-
-        function displayImage(url) {
-            const loader = document.getElementById('loader');
-            const imgEl = document.getElementById('story-image');
-            imgEl.src = url;
-            imgEl.classList.remove('hidden');
-            loader.classList.add('hidden');
-        }
-
-        function updatePage() {
-            const page = storyPages[currentPage];
-            document.getElementById('story-text').innerText = page.text;
-            document.getElementById('page-number').innerText = `Page ${currentPage + 1} of ${storyPages.length}`;
-            document.getElementById('progress-bar').style.width = `${((currentPage + 1) / storyPages.length) * 100}%`;
-            document.getElementById('prev-btn').disabled = currentPage === 0;
-            document.getElementById('next-btn').disabled = currentPage === storyPages.length - 1;
-            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-            generateImage(page.prompt, currentPage);
-        }
-
-        function changePage(delta) { currentPage += delta; updatePage(); }
-
-        async function speakWord(text, btnId = null) {
-            if (btnId) document.getElementById(btnId).classList.add('animate-pulse');
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Say clearly: ${text}` }] }],
-                        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Charon" } } } }
-                    })
-                });
-                const result = await response.json();
-                const pcm = result.candidates[0].content.parts[0].inlineData.data;
-                const blob = pcmToWav(pcm, 24000);
-                const audio = new Audio(URL.createObjectURL(blob));
-                audio.play();
-                audio.onended = () => { if (btnId) document.getElementById(btnId).classList.remove('animate-pulse'); };
-            } catch (e) {
-                const msg = new SpeechSynthesisUtterance(text);
-                window.speechSynthesis.speak(msg);
-                if (btnId) document.getElementById(btnId).classList.remove('animate-pulse');
-            }
-        }
-
-        async function readAloud() { speakWord(storyPages[currentPage].text, 'speak-btn'); }
-
-        function pcmToWav(base64, sampleRate) {
-            const buffer = Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer;
-            const wavHeader = new ArrayBuffer(44);
-            const view = new DataView(wavHeader);
-            view.setUint32(0, 0x52494646, false);
-            view.setUint32(4, 36 + buffer.byteLength, true);
-            view.setUint32(8, 0x57415645, false);
-            view.setUint32(12, 0x666d7420, false);
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true);
-            view.setUint16(22, 1, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * 2, true);
-            view.setUint16(32, 2, true);
-            view.setUint16(34, 16, true);
-            view.setUint32(36, 0x64617461, false);
-            view.setUint32(40, buffer.byteLength, true);
-            return new Blob([wavHeader, buffer], { type: 'audio/wav' });
-        }
-
-        function initVocab() {
-            const container = document.getElementById('vocab-list');
-            const select = document.getElementById('writing-word-select');
-            container.innerHTML = '';
-            select.innerHTML = '<option value="" disabled selected>Select a word...</option>';
-
-            vocabulary.forEach((v, i) => {
-                // List item
-                const card = document.createElement('div');
-                card.className = "bg-white border rounded-xl p-4 hover:shadow-md transition cursor-pointer flex justify-between items-start";
-                card.innerHTML = `
-                    <div>
-                        <h4 class="font-bold text-lg text-[#004c4c]">${v.word}</h4>
-                        <p class="text-sm text-gray-600 mb-1">${v.definition}</p>
-                    </div>
-                    <button id="vbtn-${i}" class="text-orange-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.983 5.983 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.984 3.984 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd" /></svg></button>
-                `;
-                card.onclick = () => speakWord(v.word, `vbtn-${i}`);
-                container.appendChild(card);
-
-                // Select option
-                const opt = document.createElement('option');
-                opt.value = v.word;
-                opt.innerText = v.word;
-                select.appendChild(opt);
-            });
-            nextQuiz();
-        }
-
-        function nextQuiz() {
-            const target = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-            quizTarget = target;
-            document.getElementById('quiz-definition').innerText = `"${target.definition}"`;
-            const options = [...vocabulary].sort(() => Math.random() - 0.5).slice(0, 3);
-            if (!options.find(o => o.word === target.word)) options[0] = target;
-            const shuffled = options.sort(() => Math.random() - 0.5);
-            const optContainer = document.getElementById('quiz-options');
-            optContainer.innerHTML = '';
-            shuffled.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = "bg-white border-2 border-orange-200 p-3 rounded-lg font-bold hover:bg-orange-100 transition";
-                btn.innerText = opt.word;
-                btn.onclick = () => checkQuiz(opt.word, btn);
-                optContainer.appendChild(btn);
-            });
-        }
-
-        function checkQuiz(word, btn) {
-            if (word === quizTarget.word) {
-                btn.classList.add('bg-green-500', 'text-white', 'border-green-600');
-                setTimeout(() => nextQuiz(), 1000);
-            } else {
-                btn.classList.add('bg-red-500', 'text-white', 'border-red-600');
-                setTimeout(() => btn.classList.remove('bg-red-500', 'text-white', 'border-red-600'), 500);
-            }
-        }
-
-        function submitWriting() {
-            const name = document.getElementById('student-name').value;
-            const email = document.getElementById('teacher-email').value;
-            const word = document.getElementById('writing-word-select').value;
-            const sentence = document.getElementById('student-sentence').value;
-            const toast = document.getElementById('success-toast');
-
-            // Simple validation
-            if (!name || !email || !word || !sentence.trim()) {
-                alert("Please fill out all fields (Name, Email, Word, and Sentence) before submitting!");
-                return;
-            }
-
-            // Email format check
-            if (!email.includes('@')) {
-                alert("Please enter a valid teacher email address.");
-                return;
-            }
-
-            // In a real app, this would use an API or 'mailto:' link
-            console.log(`Sending work for ${name} to ${email}...`);
-            console.log(`Word: ${word} | Sentence: ${sentence}`);
-            
-            // UI Feedback
-            toast.innerText = `Sent to ${email}! Great job, ${name}.`;
-            toast.classList.add('show');
-            
-            // Clear only the word/sentence so the student can write another one
-            document.getElementById('writing-word-select').value = "";
-            document.getElementById('student-sentence').value = "";
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 4000);
-        }
-
-        window.onload = () => updatePage();
-    </script>
-</body>
-</html>
+                        <button id="submit-btn" onclick="submitWriting()"
